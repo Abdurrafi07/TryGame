@@ -190,15 +190,13 @@ class TrashSortingGame {
     }
 
     setupEventListeners() {
-        // Mouse events
-        window.addEventListener('mousedown', (e) => this.onMouseDown(e));
-        window.addEventListener('mousemove', (e) => this.onMouseMove(e));
-        window.addEventListener('mouseup', (e) => this.onMouseUp(e));
+        const canvas = this.renderer.domElement;
 
-        // Touch events for mobile
-        window.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
-        window.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: false });
-        window.addEventListener('touchend', (e) => this.onTouchEnd(e));
+        // Use PointerEvents for unified Mouse and Touch handling
+        canvas.addEventListener('pointerdown', (e) => this.onPointerDown(e));
+        window.addEventListener('pointermove', (e) => this.onPointerMove(e));
+        window.addEventListener('pointerup', (e) => this.onPointerUp(e));
+        window.addEventListener('pointercancel', (e) => this.onPointerUp(e));
     }
 
     updateMousePosition(clientX, clientY) {
@@ -206,7 +204,7 @@ class TrashSortingGame {
         this.mouse.y = -(clientY / window.innerHeight) * 2 + 1;
     }
 
-    onMouseDown(event) {
+    onPointerDown(event) {
         if (!this.gameStarted) return;
 
         this.updateMousePosition(event.clientX, event.clientY);
@@ -223,6 +221,10 @@ class TrashSortingGame {
             }
 
             if (object.userData.isTrash) {
+                // Prevent default ONLY if we hit a game object
+                // This allows the browser to handle refresh gestures if we miss
+                if (event.cancelable) event.preventDefault();
+
                 this.selectedObject = object;
                 this.dragging = true;
                 document.body.classList.add('dragging');
@@ -236,7 +238,7 @@ class TrashSortingGame {
         }
     }
 
-    onMouseMove(event) {
+    onPointerMove(event) {
         if (!this.dragging || !this.selectedObject) return;
 
         this.updateMousePosition(event.clientX, event.clientY);
@@ -248,7 +250,7 @@ class TrashSortingGame {
         }
     }
 
-    onMouseUp(event) {
+    onPointerUp(event) {
         if (!this.dragging || !this.selectedObject) return;
 
         document.body.classList.remove('dragging');
@@ -258,40 +260,6 @@ class TrashSortingGame {
 
         this.dragging = false;
         this.selectedObject = null;
-    }
-
-    // Touch event handlers
-    onTouchStart(event) {
-        if (event.touches.length === 1) {
-            // Do NOT preventDefault here yet, as it might block UI button clicks
-            this.onMouseDown({
-                clientX: event.touches[0].clientX,
-                clientY: event.touches[0].clientY
-            });
-
-            // If we actually started dragging an object, then we can preventDefault
-            if (this.dragging) {
-                event.preventDefault();
-            }
-        }
-    }
-
-    onTouchMove(event) {
-        if (event.touches.length === 1 && this.dragging) {
-            // Only preventDefault if we are actively dragging to prevent scrolling
-            event.preventDefault();
-            this.onMouseMove({
-                clientX: event.touches[0].clientX,
-                clientY: event.touches[0].clientY
-            });
-        }
-    }
-
-    onTouchEnd(event) {
-        if (this.dragging) {
-            event.preventDefault();
-            this.onMouseUp({});
-        }
     }
 
     checkBinCollision(trashObject) {

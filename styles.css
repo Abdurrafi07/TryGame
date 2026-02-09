@@ -10,7 +10,8 @@
 
 body {
     font-family: 'Baloo 2', 'Comic Sans MS', 'Chalkboard SE', 'Arial', sans-serif;
-    overflow: hidden;
+    overflow: clip;
+    /* clip is better for games than hidden for some mobile browsers */
     background: linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48dbfb 50%, #ff9ff3 75%, #54a0ff 100%);
     background-size: 400% 400%;
     animation: gradientShift 15s ease infinite;
@@ -44,6 +45,7 @@ body {
     left: 0;
     z-index: 1;
     touch-action: none;
+    /* Required for PointerEvents dragging */
 }
 
 /* Loading Screen */
@@ -724,16 +726,16 @@ body.dragging * {
     }
 }
 
-/* Prevent text selection on drag */
-* {
+/* Prevent text selection on drag - apply only to UI if needed */
+#game-ui {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
 }
 
-/* Smooth transitions */
-* {
+/* Smooth transitions - Avoid applying to all elements (*) as it breaks performance */
+#game-ui * {
     -webkit-transition: transform 0.2s ease;
     transition: transform 0.2s ease;
 }
