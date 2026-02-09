@@ -148,7 +148,12 @@ body {
     z-index: 10;
 }
 
-#game-ui>* {
+/* Specific interactive UI elements */
+.top-bar,
+.instruction-card,
+.feedback.show,
+.primary-btn,
+.icon-btn {
     pointer-events: auto;
 }
 

@@ -225,15 +225,25 @@ class TrashSortingGame {
                 // This allows the browser to handle refresh gestures if we miss
                 if (event.cancelable) event.preventDefault();
 
+                // Set pointer capture to ensure we get events even if finger leaves the canvas
+                event.target.setPointerCapture(event.pointerId);
+
                 this.selectedObject = object;
                 this.dragging = true;
                 document.body.classList.add('dragging');
 
                 soundManager.playPickup();
 
+                // Set drag plane at the object's height
+                this.dragPlane.setFromNormalAndCoplanarPoint(
+                    new THREE.Vector3(0, 1, 0),
+                    new THREE.Vector3(0, object.position.y, 0)
+                );
+
                 // Calculate drag offset
-                this.raycaster.ray.intersectPlane(this.dragPlane, this.dragIntersection);
-                this.dragOffset.copy(this.dragIntersection).sub(this.selectedObject.position);
+                if (this.raycaster.ray.intersectPlane(this.dragPlane, this.dragIntersection)) {
+                    this.dragOffset.copy(this.dragIntersection).sub(this.selectedObject.position);
+                }
             }
         }
     }
@@ -252,6 +262,11 @@ class TrashSortingGame {
 
     onPointerUp(event) {
         if (!this.dragging || !this.selectedObject) return;
+
+        // Release pointer capture if it was set
+        if (event.target.hasPointerCapture(event.pointerId)) {
+            event.target.releasePointerCapture(event.pointerId);
+        }
 
         document.body.classList.remove('dragging');
 
