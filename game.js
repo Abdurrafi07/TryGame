@@ -221,10 +221,8 @@ class TrashSortingGame {
     }
 
     setupEventListeners() {
-        const canvas = this.renderer.domElement;
-
-        // Use PointerEvents for unified Mouse and Touch handling
-        canvas.addEventListener('pointerdown', (e) => this.onPointerDown(e));
+        // Use window listeners for everything to ensure capture even if UI elements subtly block
+        window.addEventListener('pointerdown', (e) => this.onPointerDown(e));
         window.addEventListener('pointermove', (e) => this.onPointerMove(e));
         window.addEventListener('pointerup', (e) => this.onPointerUp(e));
         window.addEventListener('pointercancel', (e) => this.onPointerUp(e));
@@ -242,13 +240,24 @@ class TrashSortingGame {
     onPointerDown(event) {
         if (!this.gameStarted) return;
 
+        // Only handle primary touch/pointer
+        if (!event.isPrimary) return;
+
         this.updateMousePosition(event);
-        logToScreen(`Click: ${this.mouse.x.toFixed(2)}, ${this.mouse.y.toFixed(2)}`);
+        logToScreen(`Down: ${this.mouse.x.toFixed(2)}, ${this.mouse.y.toFixed(2)}`);
 
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
+        // Debug: Check intersection with EVERYTHING in the scene
+        const allIntersects = this.raycaster.intersectObjects(this.scene.children, true);
+        if (allIntersects.length > 0) {
+            logToScreen(`Hit: ${allIntersects[0].object.type || 'Object'}`);
+        } else {
+            logToScreen('Hit: NOTHING');
+        }
+
         const intersects = this.raycaster.intersectObjects(this.trashObjects, true);
-        logToScreen(`Intersects: ${intersects.length}`);
+        logToScreen(`Trash: ${intersects.length}`);
 
         if (intersects.length > 0) {
             let object = intersects[0].object;
@@ -259,12 +268,12 @@ class TrashSortingGame {
             }
 
             if (object.userData.isTrash) {
-                logToScreen(`Dragging: ${object.userData.type}`);
+                logToScreen(`Grabbing: ${object.userData.type}`);
                 // Prevent default ONLY if we hit a game object
                 if (event.cancelable) event.preventDefault();
 
-                // Set pointer capture to ensure we get events even if finger leaves the canvas
-                event.target.setPointerCapture(event.pointerId);
+                // Set pointer capture on the canvas
+                this.renderer.domElement.setPointerCapture(event.pointerId);
 
                 this.selectedObject = object;
                 this.dragging = true;

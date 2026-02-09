@@ -244,18 +244,21 @@ body {
     width: 100vw;
     height: 100vh;
     background: rgba(0, 0, 0, 0.85);
-    display: flex;
+    display: none;
+    /* Completely remove from layout when inactive */
     justify-content: center;
     align-items: center;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
     padding: 1rem;
+    z-index: 20;
 }
 
 .overlay.active {
     opacity: 1;
     pointer-events: auto;
+    display: flex;
 }
 
 /* Instruction Card */
