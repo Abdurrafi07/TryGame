@@ -1,0 +1,346 @@
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial', sans-serif;
+    overflow: hidden;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #333;
+    cursor: default;
+}
+
+/* Canvas */
+#game-canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* Loading Screen */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.5s ease;
+}
+
+#loading-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+}
+
+.loading-content h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Game UI */
+#game-ui {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#game-ui > * {
+    pointer-events: auto;
+}
+
+/* Top Bar */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);
+}
+
+.score-container {
+    background: rgba(255,255,255,0.95);
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #667eea;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.score-label {
+    font-size: 1.5rem;
+}
+
+#score {
+    color: #f59e0b;
+    min-width: 60px;
+    text-align: left;
+}
+
+/* Icon Button */
+.icon-btn {
+    background: rgba(255,255,255,0.95);
+    border: none;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.icon-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.icon-btn:active {
+    transform: scale(0.95);
+}
+
+/* Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Instruction Card */
+.instruction-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 30px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.instruction-card h2 {
+    font-size: 2rem;
+    color: #667eea;
+    margin-bottom: 1.5rem;
+}
+
+.instruction-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 15px;
+}
+
+.bin-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.bin-preview.green {
+    background: linear-gradient(135deg, #84fab0, #22c55e);
+}
+
+.bin-preview.yellow {
+    background: linear-gradient(135deg, #ffd89b, #f59e0b);
+}
+
+.bin-preview.blue {
+    background: linear-gradient(135deg, #89f7fe, #3b82f6);
+}
+
+.instruction-item p {
+    text-align: left;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+/* Primary Button */
+.primary-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 1rem 3rem;
+    font-size: 1.5rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.primary-btn:active {
+    transform: translateY(0);
+}
+
+/* Feedback Messages */
+.feedback {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 2rem 3rem;
+    border-radius: 25px;
+    font-size: 2rem;
+    font-weight: bold;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 100;
+}
+
+.feedback.show {
+    opacity: 1;
+    animation: bounce 0.5s ease;
+}
+
+.feedback.success {
+    background: linear-gradient(135deg, #84fab0, #22c55e);
+    color: white;
+}
+
+.feedback.error {
+    background: linear-gradient(135deg, #ffd89b, #f59e0b);
+    color: white;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* Cursor States */
+body.dragging {
+    cursor: grabbing !important;
+}
+
+body.dragging * {
+    cursor: grabbing !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .score-container {
+        font-size: 1.3rem;
+        padding: 0.6rem 1rem;
+    }
+    
+    .score-label {
+        font-size: 1.1rem;
+    }
+    
+    .icon-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+    
+    .instruction-card {
+        padding: 1.5rem;
+        margin: 1rem;
+        max-width: 90vw;
+    }
+    
+    .instruction-card h2 {
+        font-size: 1.5rem;
+    }
+    
+    .instruction-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .instruction-item p {
+        text-align: center;
+        font-size: 1rem;
+    }
+    
+    .primary-btn {
+        padding: 0.8rem 2rem;
+        font-size: 1.2rem;
+    }
+    
+    .feedback {
+        font-size: 1.5rem;
+        padding: 1.5rem 2rem;
+    }
+}

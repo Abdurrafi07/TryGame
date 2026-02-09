@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sampah-ku - Game Edukasi Pilah Sampah</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h1>🎮 Sampah-ku</h1>
+            <p>Memuat game...</p>
+        </div>
+    </div>
+
+    <!-- Game UI Overlay -->
+    <div id="game-ui">
+        <div class="top-bar">
+            <div class="score-container">
+                <span class="score-label">⭐ Skor:</span>
+                <span id="score">0</span>
+            </div>
+            <button id="mute-btn" class="icon-btn" title="Matikan Suara">🔊</button>
+        </div>
+
+        <!-- Instructions Overlay -->
+        <div id="instructions" class="overlay active">
+            <div class="instruction-card">
+                <h2>🎯 Cara Bermain</h2>
+                <div class="instruction-item">
+                    <div class="bin-preview green">🗑️</div>
+                    <p><strong>Hijau</strong> untuk Sampah Organik 🍎</p>
+                </div>
+                <div class="instruction-item">
+                    <div class="bin-preview yellow">🗑️</div>
+                    <p><strong>Kuning</strong> untuk Sampah Plastik 🧴</p>
+                </div>
+                <div class="instruction-item">
+                    <div class="bin-preview blue">🗑️</div>
+                    <p><strong>Biru</strong> untuk Sampah Kertas 📄</p>
+                </div>
+                <button id="start-btn" class="primary-btn">Mulai Bermain! 🎮</button>
+            </div>
+        </div>
+
+        <!-- Feedback Messages -->
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <!-- Three.js Canvas -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Three.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Game Scripts -->
+    <script src="assets.js"></script>
+    <script src="sounds.js"></script>
+    <script src="ui.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
