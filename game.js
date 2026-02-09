@@ -1,5 +1,16 @@
 // Main Game Logic
 
+function logToScreen(message) {
+    const log = document.getElementById('debug-log');
+    if (log) {
+        const entry = document.createElement('div');
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        log.insertBefore(entry, log.firstChild);
+        if (log.childNodes.length > 10) log.removeChild(log.lastChild);
+    }
+    console.log(message);
+}
+
 class TrashSortingGame {
     constructor() {
         this.scene = null;
@@ -68,8 +79,15 @@ class TrashSortingGame {
             antialias: true
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(window.devicePixelRatio); // Fix for high-DPI mobile screens
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        // Ensure initial sizes are correct
+        setTimeout(() => handleResize(), 100);
+
+        // Prevent context menu (long press) on canvas
+        canvas.oncontextmenu = (e) => e.preventDefault();
 
         // Handle window resize and orientation change
         const handleResize = () => {
@@ -207,10 +225,13 @@ class TrashSortingGame {
     onPointerDown(event) {
         if (!this.gameStarted) return;
 
+        logToScreen(`PointerDown: ${event.clientX.toFixed(0)}, ${event.clientY.toFixed(0)}`);
+
         this.updateMousePosition(event.clientX, event.clientY);
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
         const intersects = this.raycaster.intersectObjects(this.trashObjects, true);
+        logToScreen(`Intersects: ${intersects.length}`);
 
         if (intersects.length > 0) {
             let object = intersects[0].object;
@@ -221,8 +242,8 @@ class TrashSortingGame {
             }
 
             if (object.userData.isTrash) {
+                logToScreen(`Dragging: ${object.userData.type}`);
                 // Prevent default ONLY if we hit a game object
-                // This allows the browser to handle refresh gestures if we miss
                 if (event.cancelable) event.preventDefault();
 
                 // Set pointer capture to ensure we get events even if finger leaves the canvas
