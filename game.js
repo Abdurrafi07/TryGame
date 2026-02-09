@@ -263,16 +263,22 @@ class TrashSortingGame {
     // Touch event handlers
     onTouchStart(event) {
         if (event.touches.length === 1) {
-            event.preventDefault();
+            // Do NOT preventDefault here yet, as it might block UI button clicks
             this.onMouseDown({
                 clientX: event.touches[0].clientX,
                 clientY: event.touches[0].clientY
             });
+
+            // If we actually started dragging an object, then we can preventDefault
+            if (this.dragging) {
+                event.preventDefault();
+            }
         }
     }
 
     onTouchMove(event) {
         if (event.touches.length === 1 && this.dragging) {
+            // Only preventDefault if we are actively dragging to prevent scrolling
             event.preventDefault();
             this.onMouseMove({
                 clientX: event.touches[0].clientX,

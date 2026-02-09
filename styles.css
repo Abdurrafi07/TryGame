@@ -18,8 +18,6 @@ body {
     cursor: default;
     -webkit-tap-highlight-color: transparent;
     /* Remove tap highlight on mobile */
-    touch-action: none;
-    /* Prevent default touch actions */
 }
 
 @keyframes gradientShift {
