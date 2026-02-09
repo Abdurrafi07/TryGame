@@ -1,0 +1,13 @@
+# MIME Types for WebGL compatibility
+AddType application/wasm .wasm
+AddType application/octet-stream .data
+AddType application/octet-stream .wasm
+AddType application/octet-stream .mem
+
+# Ensure JavaScript files are served correctly
+AddType application/javascript .js
+
+# Optional: Gzip compression for faster loading
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/wasm
+</IfModule>
