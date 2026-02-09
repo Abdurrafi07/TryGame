@@ -11,6 +11,8 @@ class TrashSortingGame {
         this.trashObjects = [];
         this.bins = [];
         this.particles = [];
+        this.clouds = [];
+        this.sun = null;
 
         this.selectedObject = null;
         this.dragging = false;
@@ -27,6 +29,7 @@ class TrashSortingGame {
         this.setupScene();
         this.setupLights();
         this.setupFloor();
+        this.setupEnvironment(); // New: Sun and Clouds
         this.setupBins();
         this.setupEventListeners();
         this.animate();
@@ -36,19 +39,26 @@ class TrashSortingGame {
     }
 
     setupScene() {
+        // Detect mobile device
+        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+
         // Scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x87ceeb);
-        this.scene.fog = new THREE.Fog(0x87ceeb, 20, 50);
+        this.scene.background = new THREE.Color(0xaed9e0); // Softer blue
+        this.scene.fog = new THREE.Fog(0xaed9e0, 20, 60);
 
-        // Camera
+        // Camera - Adaptive FOV for mobile
+        const fov = this.isMobile ? 85 : 75; // Wider FOV on mobile for better view
         this.camera = new THREE.PerspectiveCamera(
-            75,
+            fov,
             window.innerWidth / window.innerHeight,
             0.1,
             1000
         );
-        this.camera.position.set(0, 8, 12);
+
+        // Adjust camera position for mobile (pull back a bit)
+        const cameraZ = this.isMobile ? 14 : 12;
+        this.camera.position.set(0, 8, cameraZ);
         this.camera.lookAt(0, 0, 0);
 
         // Renderer
@@ -61,21 +71,33 @@ class TrashSortingGame {
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-        // Handle window resize
-        window.addEventListener('resize', () => {
+        // Handle window resize and orientation change
+        const handleResize = () => {
+            this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+
             this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.fov = this.isMobile ? 85 : 75;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Adjust camera distance on orientation change
+            const cameraZ = this.isMobile ? 14 : 12;
+            this.camera.position.z = cameraZ;
+        };
+
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(handleResize, 100); // Delay for orientation change
         });
     }
 
     setupLights() {
-        // Ambient light
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        // Ambient light - Softer and warmer
+        const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.7);
         this.scene.add(ambientLight);
 
-        // Directional light (sun)
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        // Directional light (sun) - Warmer color
+        const directionalLight = new THREE.DirectionalLight(0xfff0dd, 0.9);
         directionalLight.position.set(5, 10, 5);
         directionalLight.castShadow = true;
         directionalLight.shadow.camera.left = -15;
@@ -95,6 +117,26 @@ class TrashSortingGame {
     setupFloor() {
         const floor = createFloor();
         this.scene.add(floor);
+    }
+
+    setupEnvironment() {
+        // Add Smiling Sun
+        this.sun = createSun();
+        this.sun.position.set(15, 12, -15);
+        this.scene.add(this.sun);
+
+        // Add some clouds
+        for (let i = 0; i < 5; i++) {
+            const cloud = createCloud();
+            cloud.position.set(
+                (Math.random() - 0.5) * 40,
+                8 + Math.random() * 5,
+                -10 - Math.random() * 10
+            );
+            cloud.userData.speed = 0.005 + Math.random() * 0.01;
+            this.clouds.push(cloud);
+            this.scene.add(cloud);
+        }
     }
 
     setupBins() {
@@ -384,6 +426,22 @@ class TrashSortingGame {
         // Gentle bin animation
         this.bins.forEach((bin, index) => {
             bin.position.y = Math.sin(Date.now() * 0.0005 + index) * 0.1;
+            // Also gentle bounce rotate
+            bin.rotation.z = Math.sin(Date.now() * 0.001 + index) * 0.02;
+        });
+
+        // Animate Environment
+        if (this.sun) {
+            this.sun.rotation.z += 0.002;
+        }
+
+        this.clouds.forEach(cloud => {
+            cloud.position.x += cloud.userData.speed;
+            // Loop back clouds
+            if (cloud.position.x > 25) cloud.position.x = -25;
+
+            // Subtle float
+            cloud.position.y += Math.sin(Date.now() * 0.001 + cloud.position.x) * 0.005;
         });
 
         this.renderer.render(this.scene, this.camera);

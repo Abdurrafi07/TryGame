@@ -5,6 +5,7 @@ class UIController {
         this.score = 0;
         this.scoreElement = document.getElementById('score');
         this.feedbackElement = document.getElementById('feedback');
+        this.bigRewardElement = document.getElementById('big-reward');
         this.instructionsOverlay = document.getElementById('instructions');
         this.startBtn = document.getElementById('start-btn');
         this.muteBtn = document.getElementById('mute-btn');
@@ -45,10 +46,10 @@ class UIController {
         this.score += points;
         this.scoreElement.textContent = this.score;
 
-        // Animate score
-        this.scoreElement.parentElement.style.transform = 'scale(1.2)';
+        // Animate score with bounce
+        this.scoreElement.parentElement.style.transform = 'scale(1.3) rotate(5deg)';
         setTimeout(() => {
-            this.scoreElement.parentElement.style.transform = 'scale(1)';
+            this.scoreElement.parentElement.style.transform = 'scale(1) rotate(0deg)';
         }, 200);
     }
 
@@ -61,31 +62,58 @@ class UIController {
         }, duration);
     }
 
+    showBigReward() {
+        const rewards = ['⭐', '❤️', '🎈', '🍭', '🌈'];
+        const randomReward = rewards[Math.floor(Math.random() * rewards.length)];
+
+        this.bigRewardElement.textContent = randomReward;
+        this.bigRewardElement.className = 'big-reward';
+        if (randomReward === '❤️') this.bigRewardElement.classList.add('heart');
+
+        // Trigger reflow
+        void this.bigRewardElement.offsetWidth;
+
+        this.bigRewardElement.classList.add('show');
+
+        setTimeout(() => {
+            this.bigRewardElement.classList.remove('show');
+        }, 1000);
+    }
+
     showSuccess() {
         const messages = [
-            '🎉 Hebat!',
-            '⭐ Pintar sekali!',
-            '🌟 Bagus!',
-            '👏 Benar!',
-            '💚 Keren!'
+            'HORE! 🎉',
+            'PINTAR! ⭐',
+            'HEBAT! 🌟',
+            'YAY! 👏',
+            'BAGUS! 💚',
+            'KEREN! ✨',
+            'WOW! 💫',
+            'OK! 👍',
+            'LUCU! 😊'
         ];
 
         const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-        this.showFeedback(randomMessage, 'success');
+        this.showFeedback(randomMessage, 'success', 1800);
         this.addScore(10);
+
+        // Show big visual reward for playgroup kids
+        this.showBigReward();
     }
 
     showEncouragement() {
         const messages = [
-            '🤔 Coba lagi ya!',
-            '💡 Hmm, yang lain!',
-            '😊 Hampir betul!',
-            '🎯 Pilih yang tepat!',
-            '🌈 Ayo semangat!'
+            'AYO! 💪',
+            'LAGI! 😊',
+            'COBA! 🎯',
+            'SEMANGAT! 🌈',
+            'HMM? 🤔',
+            'BISA! ⭐',
+            'SINI! 🎨'
         ];
 
         const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-        this.showFeedback(randomMessage, 'error', 1200);
+        this.showFeedback(randomMessage, 'error', 1400);
     }
 
     getScore() {

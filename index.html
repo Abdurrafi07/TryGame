@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="Game edukasi pilah sampah 3D untuk anak-anak">
     <title>Sampah-ku - Game Edukasi Pilah Sampah</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <!-- Loading Screen -->
     <div id="loading-screen">
@@ -48,6 +55,9 @@
 
         <!-- Feedback Messages -->
         <div id="feedback" class="feedback"></div>
+
+        <!-- Big Reward Effect -->
+        <div id="big-reward" class="big-reward">⭐</div>
     </div>
 
     <!-- Three.js Canvas -->
@@ -55,11 +65,12 @@
 
     <!-- Three.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
+
     <!-- Game Scripts -->
     <script src="assets.js"></script>
     <script src="sounds.js"></script>
     <script src="ui.js"></script>
     <script src="game.js"></script>
 </body>
+
 </html>

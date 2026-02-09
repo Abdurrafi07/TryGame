@@ -70,6 +70,53 @@ function createEmojiTexture(emoji, bgColor) {
     return texture;
 }
 
+// Helper function to add a kawaii face (eyes and smile)
+function addKawaiiFace(group, scale = 1, yOffset = 0, zOffset = 0.5) {
+    const faceGroup = new THREE.Group();
+
+    // Eyes
+    const eyeGeometry = new THREE.SphereGeometry(0.1 * scale, 16, 16);
+    const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
+
+    const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+    leftEye.position.set(-0.3 * scale, 0.2 * scale + yOffset, zOffset);
+    faceGroup.add(leftEye);
+
+    const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+    rightEye.position.set(0.3 * scale, 0.2 * scale + yOffset, zOffset);
+    faceGroup.add(rightEye);
+
+    // Cheeks (blush)
+    const cheekGeometry = new THREE.CircleGeometry(0.15 * scale, 16);
+    const cheekMaterial = new THREE.MeshBasicMaterial({ color: 0xffadc7, transparent: true, opacity: 0.6 });
+
+    const leftCheek = new THREE.Mesh(cheekGeometry, cheekMaterial);
+    leftCheek.position.set(-0.5 * scale, 0 * scale + yOffset, zOffset + 0.01);
+    faceGroup.add(leftCheek);
+
+    const rightCheek = new THREE.Mesh(cheekGeometry, cheekMaterial);
+    rightCheek.position.set(0.5 * scale, 0 * scale + yOffset, zOffset + 0.01);
+    faceGroup.add(rightCheek);
+
+    // Smile (using a torus or a curved line)
+    const smileCurve = new THREE.EllipseCurve(
+        0, 0,            // ax, ay
+        0.2 * scale, 0.1 * scale, // xRadius, yRadius
+        Math.PI, 2 * Math.PI, // aStartAngle, aEndAngle
+        false,            // aClockwise
+        0                 // aRotation
+    );
+    const points = smileCurve.getPoints(50);
+    const smileGeometry = new THREE.BufferGeometry().setFromPoints(points);
+    const smileMaterial = new THREE.LineBasicMaterial({ color: 0x333333, linewidth: 2 });
+    const smile = new THREE.Line(smileGeometry, smileMaterial);
+    smile.position.set(0, -0.1 * scale + yOffset, zOffset);
+    faceGroup.add(smile);
+
+    group.add(faceGroup);
+    return faceGroup;
+}
+
 // Get random variant for a trash type
 function getRandomVariant(type) {
     const variants = TRASH_VARIANTS[type];
@@ -301,6 +348,9 @@ function createTrashObject(type, position, variantName = null) {
     mainMesh.receiveShadow = true;
     group.add(mainMesh);
 
+    // Add kawaii face to trash!
+    addKawaiiFace(group, 0.4, 0.2, 0.8);
+
     // Add subtle outline for better visibility
     const edges = new THREE.EdgesGeometry(mainMesh.geometry);
     const lineMaterial = new THREE.LineBasicMaterial({
@@ -387,6 +437,9 @@ function createBin(binType, position) {
     const wireframe = new THREE.LineSegments(edges, lineMaterial);
     group.add(wireframe);
 
+    // Add kawaii face to bin!
+    addKawaiiFace(group, 1.5, 0, 1.55);
+
     group.position.set(position.x, position.y, position.z);
 
     // Store metadata
@@ -398,11 +451,11 @@ function createBin(binType, position) {
 
 // Create floor/ground
 function createFloor() {
-    const geometry = new THREE.PlaneGeometry(30, 30);
+    const geometry = new THREE.PlaneGeometry(50, 50);
     const material = new THREE.MeshStandardMaterial({
-        color: 0x90ee90,
-        roughness: 0.8,
-        metalness: 0.2
+        color: 0x98FB98, // Mint green / Pale green
+        roughness: 0.9,
+        metalness: 0.1
     });
 
     const floor = new THREE.Mesh(geometry, material);
@@ -411,6 +464,92 @@ function createFloor() {
     floor.receiveShadow = true;
 
     return floor;
+}
+
+// Create Cloud asset
+function createCloud() {
+    const group = new THREE.Group();
+    const cloudMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 1
+    });
+
+    const puffGeometries = [
+        new THREE.SphereGeometry(1.5, 32, 32),
+        new THREE.SphereGeometry(1.2, 32, 32),
+        new THREE.SphereGeometry(1.2, 32, 32),
+        new THREE.SphereGeometry(1.0, 32, 32)
+    ];
+
+    const positions = [
+        [0, 0, 0],
+        [-1.2, -0.3, 0],
+        [1.2, -0.3, 0],
+        [0, 0.8, 0]
+    ];
+
+    puffGeometries.forEach((geo, i) => {
+        const puff = new THREE.Mesh(geo, cloudMaterial);
+        puff.position.set(...positions[i]);
+        group.add(puff);
+    });
+
+    group.scale.set(0.8, 0.8, 0.8);
+    return group;
+}
+
+// Create Smiling Sun
+function createSun() {
+    const group = new THREE.Group();
+
+    // Core
+    const sunGeo = new THREE.SphereGeometry(2, 32, 32);
+    const sunMat = new THREE.MeshBasicMaterial({ color: 0xFFD700 });
+    const sun = new THREE.Mesh(sunGeo, sunMat);
+    group.add(sun);
+
+    // Rays (simple cylinders)
+    const rayGeo = new THREE.CylinderGeometry(0.1, 0.3, 2, 8);
+    const rayMat = new THREE.MeshBasicMaterial({ color: 0xFFAA00 });
+
+    for (let i = 0; i < 8; i++) {
+        const ray = new THREE.Mesh(rayGeo, rayMat);
+        const angle = (i / 8) * Math.PI * 2;
+        ray.position.set(Math.cos(angle) * 3, Math.sin(angle) * 3, 0);
+        ray.rotation.z = angle + Math.PI / 2;
+        group.add(ray);
+    }
+
+    // Face on the sun
+    const faceCanvas = document.createElement('canvas');
+    faceCanvas.width = 128;
+    faceCanvas.height = 128;
+    const ctx = faceCanvas.getContext('2d');
+
+    // Eyes
+    ctx.fillStyle = '#333';
+    ctx.beginPath();
+    ctx.arc(40, 50, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(88, 50, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Smile
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.arc(64, 80, 25, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+
+    const texture = new THREE.CanvasTexture(faceCanvas);
+    const faceMat = new THREE.SpriteMaterial({ map: texture });
+    const faceSprite = new THREE.Sprite(faceMat);
+    faceSprite.scale.set(3, 3, 1);
+    faceSprite.position.z = 2.1;
+    group.add(faceSprite);
+
+    return group;
 }
 
 // Create particle effect for success
