@@ -5,7 +5,6 @@ class UIController {
         this.score = 0;
         this.scoreElement = document.getElementById('score');
         this.feedbackElement = document.getElementById('feedback');
-        this.bigRewardElement = document.getElementById('big-reward');
         this.instructionsOverlay = document.getElementById('instructions');
         this.startBtn = document.getElementById('start-btn');
         this.muteBtn = document.getElementById('mute-btn');
@@ -62,54 +61,36 @@ class UIController {
         }, duration);
     }
 
-    showBigReward() {
-        const rewards = ['⭐', '❤️', '🎈', '🍭', '🌈'];
-        const randomReward = rewards[Math.floor(Math.random() * rewards.length)];
-
-        this.bigRewardElement.textContent = randomReward;
-        this.bigRewardElement.className = 'big-reward';
-        if (randomReward === '❤️') this.bigRewardElement.classList.add('heart');
-
-        // Trigger reflow
-        void this.bigRewardElement.offsetWidth;
-
-        this.bigRewardElement.classList.add('show');
-
-        setTimeout(() => {
-            this.bigRewardElement.classList.remove('show');
-        }, 1000);
-    }
-
     showSuccess() {
         const messages = [
-            'HORE! 🎉',
-            'PINTAR! ⭐',
-            'HEBAT! 🌟',
-            'YAY! 👏',
-            'BAGUS! 💚',
-            'KEREN! ✨',
-            'WOW! 💫',
-            'OK! 👍',
-            'LUCU! 😊'
+            '🎉 Hebat Sekali!',
+            '⭐ Pintar Banget!',
+            '🌟 Keren Abis!',
+            '👏 Mantap!',
+            '💚 Bagus Banget!',
+            '🏆 Juara!',
+            '✨ Luar Biasa!',
+            '🎯 Tepat Sekali!',
+            '🌈 Sempurna!',
+            '💫 Wow Amazing!'
         ];
 
         const randomMessage = messages[Math.floor(Math.random() * messages.length)];
         this.showFeedback(randomMessage, 'success', 1800);
         this.addScore(10);
-
-        // Show big visual reward for playgroup kids
-        this.showBigReward();
     }
 
     showEncouragement() {
         const messages = [
-            'AYO! 💪',
-            'LAGI! 😊',
-            'COBA! 🎯',
-            'SEMANGAT! 🌈',
-            'HMM? 🤔',
-            'BISA! ⭐',
-            'SINI! 🎨'
+            '💪 Ayo Coba Lagi!',
+            '😊 Hampir Benar!',
+            '🎯 Coba Yang Lain!',
+            '🌈 Semangat!',
+            '💡 Hmm, Pikir Lagi!',
+            '🤗 Jangan Menyerah!',
+            '⭐ Kamu Pasti Bisa!',
+            '🎨 Cobalah Lagi!',
+            '🚀 Ayo Lagi!'
         ];
 
         const randomMessage = messages[Math.floor(Math.random() * messages.length)];

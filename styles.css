@@ -11,14 +11,15 @@
 body {
     font-family: 'Baloo 2', 'Comic Sans MS', 'Chalkboard SE', 'Arial', sans-serif;
     overflow: hidden;
-    /* Softer Pastel Gradient */
-    background: linear-gradient(135deg, #FFDEE9 0%, #B5FFFC 100%);
+    background: linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48dbfb 50%, #ff9ff3 75%, #54a0ff 100%);
     background-size: 400% 400%;
-    animation: gradientShift 20s ease infinite;
+    animation: gradientShift 15s ease infinite;
     color: #333;
     cursor: default;
     -webkit-tap-highlight-color: transparent;
+    /* Remove tap highlight on mobile */
     touch-action: none;
+    /* Prevent default touch actions */
 }
 
 @keyframes gradientShift {
@@ -275,29 +276,24 @@ body {
 
     0%,
     100% {
-        transform: translateY(0) rotate(0deg);
+        transform: translateY(0);
     }
 
-    33% {
-        transform: translateY(-10px) rotate(1deg);
-    }
-
-    66% {
-        transform: translateY(-5px) rotate(-1deg);
+    50% {
+        transform: translateY(-10px);
     }
 }
 
 .instruction-card h2 {
     font-family: 'Fredoka', sans-serif;
     font-size: 2.5rem;
-    /* Soft Rainbow Text */
-    background: linear-gradient(135deg, #FF6B6B, #4ECDC4, #45B7D1);
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: 2rem;
     text-shadow: none;
-    animation: wiggle 3s ease-in-out infinite;
+    animation: wiggle 2s ease-in-out infinite;
 }
 
 .instruction-item {
@@ -409,27 +405,6 @@ body {
 
 .primary-btn:active {
     transform: translateY(0) scale(1);
-}
-
-/* Large Reward (Star/Heart) Style */
-.big-reward {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    font-size: 15rem;
-    z-index: 200;
-    pointer-events: none;
-    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.big-reward.show {
-    transform: translate(-50%, -50%) scale(1);
-}
-
-.big-reward.heart {
-    filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.8));
 }
 
 /* Feedback Messages */
