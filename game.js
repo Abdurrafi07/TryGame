@@ -40,9 +40,14 @@ class TrashSortingGame {
         this.setupScene();
         this.setupLights();
         this.setupFloor();
-        this.setupEnvironment(); // New: Sun and Clouds
+        this.setupEnvironment();
         this.setupBins();
         this.setupEventListeners();
+
+        // Ensure initial sizes are correct
+        this.handleResize();
+        logToScreen('Game Initialized');
+
         this.animate();
 
         // Hide loading screen
@@ -89,24 +94,32 @@ class TrashSortingGame {
         // Prevent context menu (long press) on canvas
         canvas.oncontextmenu = (e) => e.preventDefault();
 
-        // Handle window resize and orientation change
-        const handleResize = () => {
-            this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
-
-            this.camera.aspect = window.innerWidth / window.innerHeight;
-            this.camera.fov = this.isMobile ? 85 : 75;
-            this.camera.updateProjectionMatrix();
-            this.renderer.setSize(window.innerWidth, window.innerHeight);
-
-            // Adjust camera distance on orientation change
-            const cameraZ = this.isMobile ? 14 : 12;
-            this.camera.position.z = cameraZ;
-        };
-
-        window.addEventListener('resize', handleResize);
+        // Initial handleResize setup (the actual logic is in this.handleResize)
+        window.addEventListener('resize', () => this.handleResize());
         window.addEventListener('orientationchange', () => {
-            setTimeout(handleResize, 100); // Delay for orientation change
+            setTimeout(() => this.handleResize(), 200);
         });
+    }
+
+    handleResize() {
+        if (!this.renderer || !this.camera) return;
+
+        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        this.camera.aspect = width / height;
+        this.camera.fov = this.isMobile ? 85 : 75;
+        this.camera.updateProjectionMatrix();
+
+        this.renderer.setSize(width, height);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap pixel ratio for performance
+
+        const cameraZ = this.isMobile ? 14 : 12;
+        this.camera.position.z = cameraZ;
+
+        logToScreen(`Resized: ${width}x${height}, Mobile: ${this.isMobile}`);
     }
 
     setupLights() {
@@ -217,17 +230,21 @@ class TrashSortingGame {
         window.addEventListener('pointercancel', (e) => this.onPointerUp(e));
     }
 
-    updateMousePosition(clientX, clientY) {
-        this.mouse.x = (clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+    updateMousePosition(event) {
+        const canvas = this.renderer.domElement;
+        const rect = canvas.getBoundingClientRect();
+
+        // Calculate coordinates relative to canvas and handle DPI/Scaling robustly
+        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     }
 
     onPointerDown(event) {
         if (!this.gameStarted) return;
 
-        logToScreen(`PointerDown: ${event.clientX.toFixed(0)}, ${event.clientY.toFixed(0)}`);
+        this.updateMousePosition(event);
+        logToScreen(`Click: ${this.mouse.x.toFixed(2)}, ${this.mouse.y.toFixed(2)}`);
 
-        this.updateMousePosition(event.clientX, event.clientY);
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
         const intersects = this.raycaster.intersectObjects(this.trashObjects, true);
@@ -261,6 +278,9 @@ class TrashSortingGame {
                     new THREE.Vector3(0, object.position.y, 0)
                 );
 
+                // Save original height for stable dragging
+                this.selectedObject.userData.dragY = object.position.y;
+
                 // Calculate drag offset
                 if (this.raycaster.ray.intersectPlane(this.dragPlane, this.dragIntersection)) {
                     this.dragOffset.copy(this.dragIntersection).sub(this.selectedObject.position);
@@ -272,17 +292,21 @@ class TrashSortingGame {
     onPointerMove(event) {
         if (!this.dragging || !this.selectedObject) return;
 
-        this.updateMousePosition(event.clientX, event.clientY);
+        this.updateMousePosition(event);
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
         if (this.raycaster.ray.intersectPlane(this.dragPlane, this.dragIntersection)) {
-            this.selectedObject.position.copy(this.dragIntersection.sub(this.dragOffset));
-            this.selectedObject.position.y = 2; // Keep at constant height
+            const newPos = this.dragIntersection.sub(this.dragOffset);
+            this.selectedObject.position.x = newPos.x;
+            this.selectedObject.position.z = newPos.z;
+            this.selectedObject.position.y = this.selectedObject.userData.dragY || 2;
         }
     }
 
     onPointerUp(event) {
         if (!this.dragging || !this.selectedObject) return;
+
+        logToScreen('PointerUp');
 
         // Release pointer capture if it was set
         if (event.target.hasPointerCapture(event.pointerId)) {
