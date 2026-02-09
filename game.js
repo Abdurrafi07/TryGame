@@ -31,6 +31,9 @@ class TrashSortingGame {
         this.dragOffset = new THREE.Vector3();
         this.dragIntersection = new THREE.Vector3();
 
+        // Visual debug for mobile hit testing
+        this.debugSphere = null;
+
         this.gameStarted = false;
 
         this.init();
@@ -62,6 +65,13 @@ class TrashSortingGame {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0xaed9e0); // Softer blue
         this.scene.fog = new THREE.Fog(0xaed9e0, 20, 60);
+
+        // Debug Sphere (Hidden by default)
+        const debugGeo = new THREE.SphereGeometry(0.3, 16, 16);
+        const debugMat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.8 });
+        this.debugSphere = new THREE.Mesh(debugGeo, debugMat);
+        this.debugSphere.visible = false;
+        this.scene.add(this.debugSphere);
 
         // Camera - Adaptive FOV for mobile
         const fov = this.isMobile ? 85 : 75; // Wider FOV on mobile for better view
@@ -232,50 +242,54 @@ class TrashSortingGame {
         const canvas = this.renderer.domElement;
         const rect = canvas.getBoundingClientRect();
 
-        // Calculate coordinates relative to canvas and handle DPI/Scaling robustly
-        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        // Use rect if available, fallback to window for total screen coverage
+        const width = rect.width || window.innerWidth;
+        const height = rect.height || window.innerHeight;
+        const left = rect.left || 0;
+        const top = rect.top || 0;
+
+        this.mouse.x = ((event.clientX - left) / width) * 2 - 1;
+        this.mouse.y = -((event.clientY - top) / height) * 2 + 1;
     }
 
     onPointerDown(event) {
         if (!this.gameStarted) return;
-
-        // Only handle primary touch/pointer
         if (!event.isPrimary) return;
 
-        this.updateMousePosition(event);
-        logToScreen(`Down: ${this.mouse.x.toFixed(2)}, ${this.mouse.y.toFixed(2)}`);
+        // AGGRESSIVELY stop any browser scroll/zoom gestures
+        if (event.cancelable) event.preventDefault();
 
+        this.updateMousePosition(event);
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
-        // Debug: Check intersection with EVERYTHING in the scene
+        // Hit anything? (Floor, Bins, Trash)
         const allIntersects = this.raycaster.intersectObjects(this.scene.children, true);
+
         if (allIntersects.length > 0) {
-            logToScreen(`Hit: ${allIntersects[0].object.type || 'Object'}`);
-        } else {
-            logToScreen('Hit: NOTHING');
-        }
+            const hitPoint = allIntersects[0].point;
 
-        const intersects = this.raycaster.intersectObjects(this.trashObjects, true);
-        logToScreen(`Trash: ${intersects.length}`);
+            // Move debug sphere to hit point
+            this.debugSphere.position.copy(hitPoint);
+            this.debugSphere.visible = true;
+            setTimeout(() => { if (!this.dragging) this.debugSphere.visible = false; }, 500);
 
-        if (intersects.length > 0) {
-            let object = intersects[0].object;
+            // Find trash object in hierarchy
+            let targetObject = null;
+            let current = allIntersects[0].object;
 
-            // Find the parent trash object
-            while (object.parent && !object.userData.isTrash) {
-                object = object.parent;
+            while (current) {
+                if (current.userData && current.userData.isTrash) {
+                    targetObject = current;
+                    break;
+                }
+                current = current.parent;
             }
 
-            if (object.userData.isTrash) {
-                logToScreen(`Grabbing: ${object.userData.type}`);
-                // Prevent default ONLY if we hit a game object
-                if (event.cancelable) event.preventDefault();
-
-                // Set pointer capture on the canvas
+            if (targetObject) {
+                logToScreen(`Grab: ${targetObject.userData.type}`);
                 this.renderer.domElement.setPointerCapture(event.pointerId);
 
-                this.selectedObject = object;
+                this.selectedObject = targetObject;
                 this.dragging = true;
                 document.body.classList.add('dragging');
 
@@ -284,15 +298,15 @@ class TrashSortingGame {
                 // Set drag plane at the object's height
                 this.dragPlane.setFromNormalAndCoplanarPoint(
                     new THREE.Vector3(0, 1, 0),
-                    new THREE.Vector3(0, object.position.y, 0)
+                    targetObject.position
                 );
 
                 // Save original height for stable dragging
-                this.selectedObject.userData.dragY = object.position.y;
+                this.selectedObject.userData.dragY = targetObject.position.y;
 
                 // Calculate drag offset
                 if (this.raycaster.ray.intersectPlane(this.dragPlane, this.dragIntersection)) {
-                    this.dragOffset.copy(this.dragIntersection).sub(this.selectedObject.position);
+                    this.dragOffset.copy(this.dragIntersection).sub(targetObject.position);
                 }
             }
         }
@@ -313,9 +327,13 @@ class TrashSortingGame {
     }
 
     onPointerUp(event) {
-        if (!this.dragging || !this.selectedObject) return;
+        if (!this.dragging || !this.selectedObject) {
+            this.debugSphere.visible = false;
+            return;
+        }
 
-        logToScreen('PointerUp');
+        logToScreen('Up');
+        this.debugSphere.visible = false;
 
         // Release pointer capture if it was set
         if (event.target.hasPointerCapture(event.pointerId)) {

@@ -11,14 +11,16 @@
 body {
     font-family: 'Baloo 2', 'Comic Sans MS', 'Chalkboard SE', 'Arial', sans-serif;
     overflow: clip;
-    /* clip is better for games than hidden for some mobile browsers */
+    /* Force ignore all browser gestures to let the game handle them */
+    touch-action: none !important;
+    -webkit-user-select: none;
+    user-select: none;
     background: linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48dbfb 50%, #ff9ff3 75%, #54a0ff 100%);
     background-size: 400% 400%;
     animation: gradientShift 15s ease infinite;
     color: #333;
     cursor: default;
     -webkit-tap-highlight-color: transparent;
-    /* Remove tap highlight on mobile */
 }
 
 @keyframes gradientShift {
@@ -44,8 +46,7 @@ body {
     top: 0;
     left: 0;
     z-index: 1;
-    touch-action: none;
-    /* Required for PointerEvents dragging */
+    touch-action: none !important;
 }
 
 /* Loading Screen */
@@ -146,6 +147,7 @@ body {
     height: 100vh;
     pointer-events: none;
     z-index: 10;
+    touch-action: none !important;
 }
 
 /* Specific interactive UI elements */
